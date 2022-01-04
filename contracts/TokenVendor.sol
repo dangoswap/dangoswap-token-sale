@@ -28,12 +28,18 @@ contract TokenVendor is Ownable {
         ERC20 _weth,
         ERC20 _tokenIn,
         ERC20 _tokenOut,
+        address _tokenInRecipient,
         uint256 _tokensOutPerInNumerator,
         uint256 _tokensOutPerInDenominator
     ) {
-        tokenIn = _tokenIn;
-        tokenOut = _tokenOut;
+        require(address(_weth) != address(0));
+        require(address(_tokenIn) != address(0));
+        require(address(_tokenOut) != address(0));
+        require(_tokenInRecipient != address(0));
         weth = _weth;
+        tokenIn = _tokenIn;
+        tokenOut = _tokenOut;        
+        tokenInRecipient = _tokenInRecipient;
         setPrice(_tokensOutPerInNumerator, _tokensOutPerInDenominator);
     }
 
