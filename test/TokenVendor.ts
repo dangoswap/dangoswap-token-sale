@@ -1,17 +1,18 @@
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect, use as chaiUse } from "chai";
-import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { ERC20, TokenVendor } from "../typechain-types";
+
 
 import chaiAsPromised from "chai-as-promised";
 chaiUse(chaiAsPromised);
 
 describe("TokenVendor contract", function () {
 
-  let tokenIn: Contract;
-  let tokenOut: Contract;
-  let tokenVendor: Contract;
+  let tokenIn: ERC20;
+  let tokenOut: ERC20;
+  let tokenVendor: TokenVendor;
   let alice: SignerWithAddress;
   let bob: SignerWithAddress;
   let carol: SignerWithAddress;
@@ -26,15 +27,15 @@ describe("TokenVendor contract", function () {
     [minter, alice, bob, carol, dev] = await ethers.getSigners();
 
 
-    tokenIn = await TokenIn.deploy('tokenIn Token', 'TI', 2000);
-    tokenOut = await TokenOut.deploy('tokenOut Token', 'TO', 1000);
-    tokenVendor = await TokenVendor.deploy(tokenIn.address, tokenIn.address, tokenOut.address, dev.address, 12, 100);
+    tokenIn = <ERC20> await TokenIn.deploy('tokenIn Token', 'TI', 2000);
+    tokenOut = <ERC20> await TokenOut.deploy('tokenOut Token', 'TO', 1000);
+    tokenVendor = <TokenVendor> await TokenVendor.deploy(tokenIn.address, tokenIn.address, tokenOut.address, dev.address, 12, 100);
 
     await tokenIn.connect(minter).transfer(alice.address, 1000)
     await tokenIn.connect(minter).transfer(bob.address, 1000)
     await tokenOut.connect(minter).transfer(tokenVendor.address, 1000)
 
-    console.log('balance tokenVendor for tokenOut token: ', (await tokenOut.balanceOf(tokenVendor.address)).toString());
+    //console.log('balance tokenVendor for tokenOut token: ', (await tokenOut.balanceOf(tokenVendor.address)).toString());
   });
 
   describe("Deployment", function () {
@@ -58,7 +59,7 @@ describe("TokenVendor contract", function () {
 
       // Check balances.
       const finalAliceBalance = await tokenIn.balanceOf(alice.address);
-      expect(finalAliceBalance).to.equal(initialAliceBalance - 100);
+      expect(finalAliceBalance).to.be.eq(initialAliceBalance.sub(100));
 
       const finalAliceTokenOutBalance = await tokenOut.balanceOf(alice.address);
       expect(finalAliceTokenOutBalance).to.equal(12);
@@ -67,10 +68,6 @@ describe("TokenVendor contract", function () {
       expect(devBalance).to.equal(100);
 
     });
-
-  });
-
-  describe("Transactions", function () {
 
     it("Should not be able to swap with not enough amount in wallet", async function () {
       const initialAliceBalance = await tokenIn.balanceOf(alice.address);
@@ -82,6 +79,14 @@ describe("TokenVendor contract", function () {
       let p = tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address);
       await expect(p).to.be.rejectedWith(Error);
     });
+
+    // it("Should not be able to swap with not enough tokenOut in contract wallet") {
+
+    // };
+
+    // it("Should not be able to change price if not owner") {
+      
+    // };
 
   });
 
