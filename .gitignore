@@ -7,4 +7,4 @@ node_modules/
 #Deploy and config
 scripts/
 secrets.json
-yarn.lock
+package-lock.json
