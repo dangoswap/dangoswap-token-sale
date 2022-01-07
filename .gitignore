@@ -10,3 +10,4 @@ scripts/
 secrets.json
 package-lock.json
 
+yarn-error.log
