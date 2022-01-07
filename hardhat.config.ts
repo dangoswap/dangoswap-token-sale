@@ -1,4 +1,5 @@
-require("@nomiclabs/hardhat-waffle");
+import { task } from "hardhat/config";
+import "@nomiclabs/hardhat-waffle";
 
 const { mnemonic } = require('./secrets.json');
 

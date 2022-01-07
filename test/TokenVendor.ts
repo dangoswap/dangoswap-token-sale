@@ -1,16 +1,19 @@
 
-const { expect } = require("chai");
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { expect } from "chai";
+import { Contract } from "ethers";
+import { ethers } from "hardhat";
 
 describe("TokenVendor contract", function () {
 
-  let tokenIn;
-  let tokenOut;
-  let tokenVendor;
-  let alice;
-  let bob;
-  let carol;
-  let dev;
-  let minter;
+  let tokenIn : Contract;
+  let tokenOut : Contract;
+  let tokenVendor : Contract;
+  let alice : SignerWithAddress;
+  let bob : SignerWithAddress;
+  let carol : SignerWithAddress;
+  let dev : SignerWithAddress;
+  let minter : SignerWithAddress;
 
   beforeEach(async function () {
     // Get the ContractFactory and Signers here.
@@ -49,6 +52,32 @@ describe("TokenVendor contract", function () {
 
       // Swap 100 tokenIn from alice to tokenOut.
       await tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address);
+
+      // Check balances.
+      const finalAliceBalance = await tokenIn.balanceOf(alice.address);
+      expect(finalAliceBalance).to.equal(initialAliceBalance - 100);
+
+      const finalAliceTokenOutBalance = await tokenOut.balanceOf(alice.address);
+      expect(finalAliceTokenOutBalance).to.equal(12);
+
+      const devBalance = await tokenIn.balanceOf(dev.address);
+      expect(devBalance).to.equal(100);
+
+    });
+
+  });
+
+  describe("Transactions", function () {
+
+    it("Should not be able to swap with not enough amount in wallet", async function () {
+      const initialAliceBalance = await tokenIn.balanceOf(alice.address);
+
+      await tokenIn.connect(alice).approve(tokenVendor.address, '1000');
+      await tokenIn.connect(alice).transfer(bob.address, '901');
+
+      // Swap 100 tokenIn from alice to tokenOut.
+      let p = tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address);
+      await expect(p)
 
       // Check balances.
       const finalAliceBalance = await tokenIn.balanceOf(alice.address);
