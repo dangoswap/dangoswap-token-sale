@@ -3,8 +3,10 @@ artifacts/
 build/
 cache/
 node_modules/
+typechain-types/
 
 #Deploy and config
 scripts/
 secrets.json
 package-lock.json
+

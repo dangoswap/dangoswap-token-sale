@@ -1,5 +1,7 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
+import '@nomiclabs/hardhat-ethers';
+import '@typechain/hardhat';
 
 const { mnemonic } = require('./secrets.json');
 
