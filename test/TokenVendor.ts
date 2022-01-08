@@ -7,6 +7,7 @@ import { ERC20, TokenVendor } from "../typechain-types";
 
 import chaiAsPromised from "chai-as-promised";
 chaiUse(chaiAsPromised);
+chaiUse(require('chai-string'));
 
 describe("TokenVendor contract", function () {
 
@@ -30,6 +31,7 @@ describe("TokenVendor contract", function () {
     tokenIn = <ERC20> await TokenIn.deploy('tokenIn Token', 'TI', 20000000);
     tokenOut = <ERC20> await TokenOut.deploy('tokenOut Token', 'TO', 1000);
     tokenVendor = <TokenVendor> await TokenVendor.deploy(tokenIn.address, tokenIn.address, tokenOut.address, dev.address, 12, 100);
+    tokenVendor = tokenVendor.connect(ethers.getDefaultProvider());
 
 
     await tokenIn.connect(minter).transfer(alice.address, 1000)
@@ -44,6 +46,11 @@ describe("TokenVendor contract", function () {
     it("Should assign the total supply of tokens to the owner", async function () {
       const tokenVendorBalance = await tokenOut.balanceOf(tokenVendor.address);
       expect(await tokenOut.totalSupply()).to.equal(tokenVendorBalance);
+    });
+
+    it("Should not be able to call TokenVendor without connecting", async function() {
+      const p = tokenVendor.setPrice(1,1);
+      expect(p).to.be.rejectedWith(Error);
     });
 
   });
@@ -77,7 +84,7 @@ describe("TokenVendor contract", function () {
       await tokenIn.connect(alice).transfer(bob.address, '901');
 
       // Swap 100 tokenIn from alice to tokenOut.
-      let p = tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address);
+      let p = tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address);      
       await expect(p).to.be.rejectedWith(Error);
     });
 
@@ -86,16 +93,19 @@ describe("TokenVendor contract", function () {
       let p = tokenVendor.connect(alice).swapTokens(100000, alice.address, alice.address);
       await expect(p).to.be.rejectedWith(Error);
     });
+  });
 
+  describe("Price", async () => {
     it("Should not be able to change price if not owner", async () => {
-      let p = tokenVendor.connect(alice).setPrice(12, 100);
-      await expect(p).to.be.rejectedWith(Error);      
+      let p = tokenVendor.connect(alice).setPrice(12, 100);      
+      var e = <Error> await expect(p).to.be.rejectedWith(Error);
+      expect(e.message).to.contains('Ownable');
     });
 
     it("Should be able to change price if is owner", async () => {
-      var t = await tokenVendor.setPrice(11, 99);
-      expect(await tokenVendor.tokensOutPerInNumerator()).to.be.eq(11);
-      expect(await tokenVendor.tokensOutPerInDenominator()).to.be.eq(99);
+      var t = await tokenVendor.connect(owner).setPrice(11, 99);
+      expect(await tokenVendor.connect(alice).tokensOutPerInNumerator()).to.be.eq(11);
+      expect(await tokenVendor.connect(alice).tokensOutPerInDenominator()).to.be.eq(99);
     });
 
     it("Should not be able to change price numerator to zero", async () => {
