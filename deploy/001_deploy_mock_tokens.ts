@@ -5,18 +5,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer, tokenOwner} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   await deploy('TokenIn', {
     from: deployer,
-    args: ['tokenIn Token', 'TI', 20000000],
+    args: ['tokenIn Token', 'TI', '200000000000000000000000000'],
     contract: 'MockERC20',
     log: true,    
   });
 
   await deploy('TokenOut', {    
     from: deployer,
-    args: ['tokenOut Token', 'TO', 1000],
+    args: ['tokenOut Token', 'TO', '200000000000000000000000000'],
     contract: 'MockERC20',
     log: true,    
   });
