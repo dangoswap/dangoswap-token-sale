@@ -91,4 +91,12 @@ contract TokenVendor is Ownable {
 
         return amountToBuy;
     }
+
+    function withdrawToken(address tokenRecipient, uint256 amount) public onlyOwner {
+        require(amount > 0);
+        require(tokenRecipient != address(0));
+        bool sent = tokenOut.transfer(tokenRecipient, amount);
+        require(sent, "Failed to transfer token to recipient");        
+        emit SwapTokens(msg.sender, tokenRecipient, 0, amount);
+    }
 }
