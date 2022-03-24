@@ -137,4 +137,37 @@ describe('TokenVendor contract', function () {
 
   })
 
+  describe('Admin', async () => {
+    it('Should not allow withdraw if not owner', async() =>  {
+      let p = tokenVendor.connect(carol).withdrawToken(carol.address, 1);
+      await expect(p).rejectedWith(Error);
+    })
+
+    it('Should fail if withdraw too much', async() =>  {
+      let vendorBalanceBefore = await tokenOut.balanceOf(tokenVendor.address);
+      let c = tokenVendor.connect(owner);
+
+      // make sure withdraw is ok
+      await c.withdrawToken(carol.address, 1);
+      expect(await tokenOut.balanceOf(tokenVendor.address)).equal(vendorBalanceBefore.sub(1));
+
+      // withdraw too much
+      let p = c.withdrawToken(carol.address, vendorBalanceBefore);
+      let e = expect(p).rejectedWith(Error);
+    })
+
+    it('Should allow withdraw to anyone if is owner', async() => {
+      let vendorBalanceBefore = await tokenOut.balanceOf(tokenVendor.address);
+      let carolBalanceBefore = await tokenOut.balanceOf(carol.address);
+      await tokenVendor.connect(owner).withdrawToken(carol.address, 1);
+      expect(await tokenOut.balanceOf(tokenVendor.address)).equal(vendorBalanceBefore.sub(1));
+      expect(await tokenOut.balanceOf(carol.address)).equal(carolBalanceBefore.add(1));
+    })
+
+    it('Should not allow null address as recipient', async() => {
+      let p = tokenVendor.connect(owner).withdrawToken('0x', 1);
+      expect(p).rejectedWith(Error);
+    });
+  })
+
 })
