@@ -80,7 +80,7 @@ describe('TokenVendor contract', function () {
       await tokenIn.connect(alice).approve(tokenVendor.address, 1000)
 
       // Swap 100 tokenIn from alice to tokenOut.
-      await tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address)
+      await tokenVendor.connect(alice).swapTokens(100)
 
       // Check balances.
       const finalAliceBalance = await tokenIn.balanceOf(alice.address)
@@ -101,13 +101,13 @@ describe('TokenVendor contract', function () {
       await tokenIn.connect(alice).transfer(bob.address, '901')
 
       // Swap 100 tokenIn from alice to tokenOut.
-      let p = tokenVendor.connect(alice).swapTokens(100, alice.address, alice.address)      
+      let p = tokenVendor.connect(alice).swapTokens(100)
       await expect(p).to.be.rejectedWith(Error)
     })
 
     it('Should not be able to swap with not enough tokenOut in contract wallet', async () => {
       await tokenIn.connect(minter).transfer(alice.address, 100000)
-      let p = tokenVendor.connect(alice).swapTokens(100000, alice.address, alice.address)
+      let p = tokenVendor.connect(alice).swapTokens(100000)
       await expect(p).to.be.rejectedWith(Error)
     })
   })
