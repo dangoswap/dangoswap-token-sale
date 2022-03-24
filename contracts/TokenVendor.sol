@@ -3,11 +3,9 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenVendor is Ownable {
-    using SafeMath for uint256;
+contract TokenVendor is Ownable {    
 
     // token price for ETH
     uint256 public tokensOutPerInNumerator;
@@ -19,8 +17,8 @@ contract TokenVendor is Ownable {
 
     event SwapTokens(        
         address indexed _to,
-        uint256 tokenInAmount,
-        uint256 tokenOutAmount
+        uint256 _tokenInAmount,
+        uint256 _tokenOutAmount
     );
 
     constructor(
@@ -59,14 +57,12 @@ contract TokenVendor is Ownable {
     }
 
     function swapTokens(
-        uint256 tokenInAmount
-    ) public returns (uint256 tokenOutAmount) {
+        uint256 _tokenInAmount
+    ) public returns (uint256 _tokenOutAmount) {
         address to = msg.sender;
         address from = msg.sender;
 
-        uint256 amountToBuy = tokenInAmount.mul(tokensOutPerInNumerator).div(
-            tokensOutPerInDenominator
-        );
+        uint256 amountToBuy = _tokenInAmount * tokensOutPerInNumerator / tokensOutPerInDenominator;
 
         // check if the Vendor Contract has enough amount of tokens for the transaction
         uint256 vendorBalance = tokenOut.balanceOf(address(this));
@@ -78,7 +74,7 @@ contract TokenVendor is Ownable {
         bool received = tokenIn.transferFrom(
             from,
             tokenInRecipient,
-            tokenInAmount
+            _tokenInAmount
         );
         require(received, "Failed to receive token from user");
 
@@ -87,16 +83,16 @@ contract TokenVendor is Ownable {
         require(sent, "Failed to transfer token to user");
 
         // emit the event
-        emit SwapTokens(to, tokenInAmount, amountToBuy);
+        emit SwapTokens(to, _tokenInAmount, amountToBuy);
 
         return amountToBuy;
     }
 
-    function withdrawToken(address tokenRecipient, uint256 amount) public onlyOwner {
-        require(amount > 0);
-        require(tokenRecipient != address(0));
-        bool sent = tokenOut.transfer(tokenRecipient, amount);
+    function withdrawToken(address _tokenRecipient, uint256 _amount) public onlyOwner {
+        require(_amount > 0);
+        require(_tokenRecipient != address(0));
+        bool sent = tokenOut.transfer(_tokenRecipient, _amount);
         require(sent, "Failed to transfer token to recipient");        
-        emit SwapTokens(msg.sender, tokenRecipient, 0, amount);
+        emit SwapTokens(_tokenRecipient, 0, _amount);
     }
 }
