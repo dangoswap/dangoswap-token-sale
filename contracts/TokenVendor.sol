@@ -17,8 +17,7 @@ contract TokenVendor is Ownable {
     ERC20 public immutable weth;
     address public tokenInRecipient;
 
-    event SwapTokens(
-        address indexed _from,
+    event SwapTokens(        
         address indexed _to,
         uint256 tokenInAmount,
         uint256 tokenOutAmount
@@ -60,10 +59,11 @@ contract TokenVendor is Ownable {
     }
 
     function swapTokens(
-        uint256 tokenInAmount,
-        address from,
-        address to
+        uint256 tokenInAmount
     ) public returns (uint256 tokenOutAmount) {
+        address to = msg.sender;
+        address from = msg.sender;
+
         uint256 amountToBuy = tokenInAmount.mul(tokensOutPerInNumerator).div(
             tokensOutPerInDenominator
         );
@@ -83,11 +83,11 @@ contract TokenVendor is Ownable {
         require(received, "Failed to receive token from user");
 
         // Transfer token to the msg.sender
-        bool sent = tokenOut.transfer(msg.sender, amountToBuy);
+        bool sent = tokenOut.transfer(to, amountToBuy);
         require(sent, "Failed to transfer token to user");
 
         // emit the event
-        emit SwapTokens(from, to, tokenInAmount, amountToBuy);
+        emit SwapTokens(to, tokenInAmount, amountToBuy);
 
         return amountToBuy;
     }
