@@ -62,7 +62,11 @@ contract TokenVendor is Ownable {
         address to = msg.sender;
         address from = msg.sender;
 
+        require(_tokenInAmount > 0, "Token input must not be zero");
+
         uint256 amountToBuy = _tokenInAmount * tokensOutPerInNumerator / tokensOutPerInDenominator;
+
+        require(amountToBuy > 0, "Token input is too low");
 
         // check if the Vendor Contract has enough amount of tokens for the transaction
         uint256 vendorBalance = tokenOut.balanceOf(address(this));
